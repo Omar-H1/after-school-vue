@@ -1,65 +1,6 @@
 const { createApp } = Vue;
 const { createRouter, createWebHashHistory } = VueRouter;
 
-const LoginComponent = {
-  template: `
-    <div class="container mt-5">
-      <div class="row justify-content-center">
-        <div class="col-md-6">
-          <h2 class="text-center mb-4">Login</h2>
-          <form @submit.prevent="login">
-            <div class="mb-3">
-              <label for="user" class="form-label">Student ID</label>
-              <input type="text" id="user" v-model="loginForm.user" class="form-control" required placeholder="e.g. M00123456">
-            </div>
-            <div class="mb-3">
-              <label for="password" class="form-label">Password</label>
-              <input type="password" id="password" v-model="loginForm.password" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">Login</button>
-            <div v-if="loginError" class="alert alert-danger mt-3">{{ loginError }}</div>
-          </form>
-        </div>
-      </div>
-    </div>
-  `,
-  data() {
-    return {
-      loginForm: {
-        user: '',
-        password: ''
-      },
-      loginError: ''
-    };
-  },
-  methods: {
-    async login() {
-      this.loginError = '';
-      try {
-        const response = await fetch(`${this.$root.apiBase}/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.loginForm)
-        });
-        const result = await response.json();
-        if (result.ok) {
-          localStorage.setItem('token', result.token);
-          localStorage.setItem('loggedIn', 'true');
-          await this.$root.fetchLessons();
-          await this.$root.fetchCart();
-          await this.$root.fetchOrders();
-          this.$router.push('/lessons');
-        } else {
-          this.loginError = result.error || 'Login failed';
-        }
-      } catch (error) {
-        console.error('Login error:', error);
-        this.loginError = 'Network error. Please try again.';
-      }
-    }
-  }
-};
-
 const LessonsComponent = {
   template: `
     <div>
@@ -78,13 +19,13 @@ const LessonsComponent = {
       </div>
       <div class="row">
         <div v-for="lesson in lessons" :key="lesson._id" class="col-md-6 col-lg-4 mb-4">
-          <div class="card h-100">
+          <div class="card h-100" style="border: 2px solid purple; background-color: #f0f0f0;">
             <div class="card-body">
-              <h5 class="card-title"><i :class="lesson.icon"></i> {{ lesson.subject }}</h5>
-              <p class="card-text">Location: {{ lesson.location }}</p>
-              <p class="card-text">Price: £{{ lesson.price }}</p>
-              <p class="card-text">Spaces: {{ lesson.spaces }}</p>
-              <button @click="$root.addToCart(lesson)" :disabled="lesson.spaces === 0" class="btn btn-primary">Add to Cart</button>
+              <h5 class="card-title" style="color: purple;"><i :class="lesson.icon"></i> {{ lesson.subject }}</h5>
+              <p class="card-text" style="color: black;">Location: {{ lesson.location }}</p>
+              <p class="card-text" style="color: black;">Price: £{{ lesson.price }}</p>
+              <p class="card-text" style="color: black;">Spaces: {{ lesson.spaces }}</p>
+              <button @click="$root.addToCart(lesson)" :disabled="lesson.spaces === 0" class="btn" style="background-color: purple; color: white;">Add to Cart</button>
             </div>
           </div>
         </div>
@@ -180,20 +121,29 @@ const CartComponent = {
             <input type="text" id="phone" v-model="orderForm.phone" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="cardNumber" class="form-label">Card Number (16 digits)</label>
-            <input type="text" id="cardNumber" v-model="orderForm.cardNumber" class="form-control" required>
+            <label class="form-label">Payment Method</label>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" v-model="orderForm.paymentMethod" value="online" id="online" required>
+              <label class="form-check-label" for="online">Online</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" v-model="orderForm.paymentMethod" value="cash" id="cash" required>
+              <label class="form-check-label" for="cash">Cash</label>
+            </div>
           </div>
-          <div class="mb-3">
-            <label for="expiry" class="form-label">Expiry Date (MM/YY)</label>
-            <input type="text" id="expiry" v-model="orderForm.expiry" class="form-control" placeholder="MM/YY" required>
-          </div>
-          <div class="mb-3">
-            <label for="cvv" class="form-label">CVV (3 digits)</label>
-            <input type="text" id="cvv" v-model="orderForm.cvv" class="form-control" required>
-          </div>
-          <div class="mb-3">
-            <label for="cardholderName" class="form-label">Cardholder Name</label>
-            <input type="text" id="cardholderName" v-model="orderForm.cardholderName" class="form-control" required>
+          <div v-if="orderForm.paymentMethod === 'online'">
+            <div class="mb-3">
+              <label for="bankName" class="form-label">Bank Name</label>
+              <input type="text" id="bankName" v-model="orderForm.bankName" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="accountNumber" class="form-label">Account Number</label>
+              <input type="text" id="accountNumber" v-model="orderForm.accountNumber" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="sortCode" class="form-label">Sort Code</label>
+              <input type="text" id="sortCode" v-model="orderForm.sortCode" class="form-control" required>
+            </div>
           </div>
           <button type="submit" :disabled="!isFormValid || selectedItems.length === 0" class="btn btn-success">Checkout Selected Items</button>
           <div v-if="checkoutError" class="alert alert-danger mt-3">{{ checkoutError }}</div>
@@ -207,10 +157,10 @@ const CartComponent = {
       orderForm: {
         name: '',
         phone: '',
-        cardNumber: '',
-        expiry: '',
-        cvv: '',
-        cardholderName: ''
+        paymentMethod: '',
+        bankName: '',
+        accountNumber: '',
+        sortCode: ''
       },
       checkoutError: ''
     };
@@ -228,30 +178,30 @@ const CartComponent = {
     isFormValid() {
       const nameRegex = /^[a-zA-Z\s]+$/;
       const phoneRegex = /^\d{10,}$/;
-      const cardNumberRegex = /^\d{16}$/;
-      const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
-      const cvvRegex = /^\d{3}$/;
-      const cardholderNameRegex = /^[a-zA-Z\s]+$/;
-      return nameRegex.test(this.orderForm.name) &&
-             phoneRegex.test(this.orderForm.phone) &&
-             cardNumberRegex.test(this.orderForm.cardNumber) &&
-             expiryRegex.test(this.orderForm.expiry) &&
-             cvvRegex.test(this.orderForm.cvv) &&
-             cardholderNameRegex.test(this.orderForm.cardholderName);
+      if (!nameRegex.test(this.orderForm.name) || !phoneRegex.test(this.orderForm.phone) || !this.orderForm.paymentMethod) {
+        return false;
+      }
+      if (this.orderForm.paymentMethod === 'online') {
+        const bankNameRegex = /^[a-zA-Z\s]+$/;
+        const accountNumberRegex = /^\d{8}$/;
+        const sortCodeRegex = /^\d{2}-\d{2}-\d{2}$/;
+        return bankNameRegex.test(this.orderForm.bankName) &&
+               accountNumberRegex.test(this.orderForm.accountNumber) &&
+               sortCodeRegex.test(this.orderForm.sortCode);
+      }
+      return true;
     }
   },
   methods: {
     async removeFromCart(index) {
       const item = this.cart[index];
       try {
-        const token = localStorage.getItem('token');
         const response = await fetch(`${this.$root.apiBase}/cart/remove`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ lessonId: item._id, qty: item.qty })
+          body: JSON.stringify({ lessonId: item._id })
         });
         const result = await response.json();
         if (result.ok) {
@@ -271,8 +221,14 @@ const CartComponent = {
       const order = {
         name: this.orderForm.name,
         phone: this.orderForm.phone,
+        paymentMethod: this.orderForm.paymentMethod,
         items: selectedCartItems.map(item => ({ lessonId: item._id, qty: item.qty }))
       };
+      if (this.orderForm.paymentMethod === 'online') {
+        order.bankName = this.orderForm.bankName;
+        order.accountNumber = this.orderForm.accountNumber;
+        order.sortCode = this.orderForm.sortCode;
+      }
       try {
         const token = localStorage.getItem('token');
         const response = await fetch(`${this.$root.apiBase}/orders`, {
@@ -292,7 +248,7 @@ const CartComponent = {
             this.$root.cart.splice(index, 1);
           });
           this.selectedItems = [];
-          this.orderForm = { name: '', phone: '', cardNumber: '', expiry: '', cvv: '', cardholderName: '' };
+          this.orderForm = { name: '', phone: '', paymentMethod: '', bankName: '', accountNumber: '', sortCode: '' };
           this.$router.push('/lessons');
           await this.$root.fetchLessons();
           await this.$root.fetchOrders();
@@ -357,8 +313,7 @@ const OrdersComponent = {
 };
 
 const routes = [
-  { path: '/', redirect: '/login' },
-  { path: '/login', component: LoginComponent },
+  { path: '/', redirect: '/lessons' },
   { path: '/lessons', component: LessonsComponent },
   { path: '/cart', component: CartComponent },
   { path: '/orders', component: OrdersComponent }
@@ -371,15 +326,14 @@ const router = createRouter({
 
 const App = {
   template: `
-    <div>
-      <nav v-if="isLoggedIn" class="navbar navbar-expand-lg navbar-light bg-light">
+    <div style="background-color: #f8f9fa; min-height: 100vh;">
+      <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: black;">
         <div class="container-fluid">
-          <router-link to="/lessons" class="navbar-brand">After School App</router-link>
+          <router-link to="/lessons" class="navbar-brand" style="color: purple; font-size: 1.8em; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🚀 After School App</router-link>
           <div class="navbar-nav">
-            <router-link to="/lessons" class="nav-link">Lessons</router-link>
-            <router-link to="/cart" class="nav-link"><i class="fas fa-shopping-cart"></i> <span v-if="cart.length > 0" class="badge bg-primary">{{ cart.length }}</span></router-link>
-            <router-link to="/orders" class="nav-link">Orders</router-link>
-            <button @click="logout" class="btn btn-outline-danger ms-2">Logout</button>
+            <router-link to="/lessons" class="nav-link" style="color: white;">Lessons</router-link>
+            <router-link to="/cart" class="nav-link" style="color: white;"><i class="fas fa-shopping-cart"></i> <span v-if="cart.length > 0" class="badge" style="background-color: purple;">{{ cart.length }}</span></router-link>
+            <router-link to="/orders" class="nav-link" style="color: white;">Orders</router-link>
           </div>
         </div>
       </nav>
@@ -388,12 +342,6 @@ const App = {
   `,
   data() {
     return {
-      currentView: 'login',
-      loginForm: {
-        user: '',
-        password: ''
-      },
-      loginError: '',
       lessons: [],
       cart: [],
       orders: [],
@@ -407,54 +355,12 @@ const App = {
       apiBase: localStorage.getItem('apiBase') || 'http://localhost:8080'
     };
   },
-  computed: {
-    isLoggedIn() {
-      return localStorage.getItem('loggedIn') === 'true';
-    }
-  },
   async mounted() {
-    // Check if already logged in
-    const loggedIn = localStorage.getItem('loggedIn');
-    if (loggedIn === 'true') {
-      await this.fetchLessons();
-      await this.fetchCart();
-      await this.fetchOrders();
-      this.$router.push('/lessons');
-    } else {
-      this.$router.push('/login');
-    }
+    await this.fetchLessons();
+    await this.fetchCart();
+    await this.fetchOrders();
   },
   methods: {
-    async login() {
-      this.loginError = '';
-      try {
-        const response = await fetch(`${this.apiBase}/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.loginForm)
-        });
-        const result = await response.json();
-        if (result.ok) {
-          localStorage.setItem('token', result.token);
-          localStorage.setItem('loggedIn', 'true');
-          this.currentView = 'lessons';
-          await this.fetchLessons();
-          await this.fetchCart();
-          await this.fetchOrders();
-          this.$router.push('/lessons');
-        } else {
-          if (result.error === 'Invalid credentials') {
-            this.loginError = 'Student ID must be in the format e.g. M00123456';
-          } else {
-            this.loginError = result.error || 'Login failed';
-          }
-        }
-      } catch (error) {
-        console.error('Login error:', error);
-        this.loginError = 'Network error. Please try again.';
-      }
-    },
-
     async fetchOrders() {
       try {
         const token = localStorage.getItem('token');
@@ -509,12 +415,10 @@ const App = {
     async addToCart(lesson) {
       if (lesson.spaces > 0) {
         try {
-          const token = localStorage.getItem('token');
           const response = await fetch(`${this.apiBase}/cart/add`, {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify({ lessonId: lesson._id, qty: 1 })
           });
@@ -529,50 +433,6 @@ const App = {
           console.error('Add to cart error:', error);
         }
       }
-    },
-
-    async checkout() {
-      this.checkoutError = '';
-      if (!this.isFormValid) return;
-      const order = {
-        name: this.orderForm.name,
-        phone: this.orderForm.phone,
-        items: this.cart.map(item => ({ lessonId: item._id, qty: item.qty }))
-      };
-      try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${this.apiBase}/orders`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(order)
-        });
-        const result = await response.json();
-        if (result.ok) {
-          alert('Order placed successfully!');
-          this.cart = [];
-          this.orderForm = { name: '', phone: '', cardNumber: '', expiry: '', cvv: '', cardholderName: '' };
-          this.currentView = 'lessons';
-          await this.fetchLessons();
-          await this.fetchOrders();
-          this.$router.push('/lessons');
-        } else {
-          this.checkoutError = result.error || 'Order failed';
-        }
-      } catch (error) {
-        console.error('Checkout failed:', error);
-        this.checkoutError = 'Network error. Please try again.';
-      }
-    },
-    logout() {
-      localStorage.removeItem('token');
-      localStorage.removeItem('loggedIn');
-      this.cart = [];
-      this.orders = [];
-      this.lessons = [];
-      this.$router.push('/login');
     },
     getLessonName(lessonId) {
       const lesson = this.lessons.find(l => l._id === lessonId);
