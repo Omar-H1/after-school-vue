@@ -44,21 +44,18 @@ const LessonsComponent = {
       }
     };
   },
-  async mounted() {
-    await this.fetchLessons();
+  mounted() {
+    this.lessons = this.$root.lessons.slice();
+  },
+  watch: {
+    '$root.lessons': function(newLessons) {
+      this.lessons = newLessons.slice();
+    }
   },
   methods: {
-    async fetchLessons() {
-      try {
-        const response = await fetch(`${this.$root.apiBase}/lessons`);
-        this.lessons = await response.json();
-      } catch (error) {
-        console.error('Failed to fetch lessons:', error);
-      }
-    },
     async searchLessons() {
       if (this.searchTerm.trim() === '') {
-        await this.fetchLessons();
+        await this.$root.fetchLessons();
         return;
       }
       try {
@@ -415,6 +412,7 @@ const App = {
           if (result.ok) {
             await this.fetchCart();
             await this.fetchLessons();
+            this.showSuccessMessage('Item added to cart successfully!');
           } else {
             console.error('Failed to add to cart:', result.error);
             alert('Failed to add to cart: ' + result.error);
@@ -426,6 +424,25 @@ const App = {
       } else {
         alert('No spaces available for this lesson.');
       }
+    },
+    showSuccessMessage(message) {
+      // Create a small green box message
+      const messageDiv = document.createElement('div');
+      messageDiv.textContent = message;
+      messageDiv.style.position = 'fixed';
+      messageDiv.style.top = '20px';
+      messageDiv.style.right = '20px';
+      messageDiv.style.backgroundColor = 'green';
+      messageDiv.style.color = 'white';
+      messageDiv.style.padding = '10px';
+      messageDiv.style.borderRadius = '5px';
+      messageDiv.style.zIndex = '1000';
+      messageDiv.style.fontSize = '14px';
+      document.body.appendChild(messageDiv);
+      // Remove after 3 seconds
+      setTimeout(() => {
+        document.body.removeChild(messageDiv);
+      }, 3000);
     },
     getLessonName(lessonId) {
       const lesson = this.lessons.find(l => l._id === lessonId);
