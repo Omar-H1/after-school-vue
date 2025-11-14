@@ -230,12 +230,10 @@ const CartComponent = {
         order.sortCode = this.orderForm.sortCode;
       }
       try {
-        const token = localStorage.getItem('token');
         const response = await fetch(`${this.$root.apiBase}/orders`, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(order)
         });
@@ -296,10 +294,7 @@ const OrdersComponent = {
   methods: {
     async fetchOrders() {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${this.$root.apiBase}/orders`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const response = await fetch(`${this.$root.apiBase}/orders`);
         this.orders = await response.json();
       } catch (error) {
         console.error('Failed to fetch orders:', error);
@@ -363,10 +358,7 @@ const App = {
   methods: {
     async fetchOrders() {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${this.apiBase}/orders`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const response = await fetch(`${this.apiBase}/orders`);
         this.orders = await response.json();
       } catch (error) {
         console.error('Failed to fetch orders:', error);
@@ -374,10 +366,7 @@ const App = {
     },
     async fetchCart() {
       try {
-        const token = localStorage.getItem('token');
-        const response = await fetch(`${this.apiBase}/cart`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const response = await fetch(`${this.apiBase}/cart`);
         this.cart = await response.json();
       } catch (error) {
         console.error('Failed to fetch cart:', error);
@@ -428,10 +417,14 @@ const App = {
             await this.fetchLessons();
           } else {
             console.error('Failed to add to cart:', result.error);
+            alert('Failed to add to cart: ' + result.error);
           }
         } catch (error) {
           console.error('Add to cart error:', error);
+          alert('Network error: Failed to add to cart. Please try again.');
         }
+      } else {
+        alert('No spaces available for this lesson.');
       }
     },
     getLessonName(lessonId) {
