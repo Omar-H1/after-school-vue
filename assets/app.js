@@ -244,17 +244,12 @@ const CartComponent = {
         });
         const result = await response.json();
         if (result.ok) {
-          alert('Order placed successfully!');
-          // Remove selected items from cart
-          this.selectedItems.sort((a, b) => b - a); // Sort in descending order to remove from end
-          this.selectedItems.forEach(index => {
-            this.$root.cart.splice(index, 1);
-          });
+          this.$root.showSuccessMessage('Order booked successfully!');
           this.selectedItems = [];
           this.orderForm = { name: '', phone: '', paymentMethod: '', cardNumber: '', cardName: '', expiryDate: '', securityCode: '' };
-          this.$router.push('/lessons');
           await this.$root.fetchLessons();
           await this.$root.fetchOrders();
+          await this.$root.fetchCart(); // Refresh cart to reflect backend changes
         } else {
           this.checkoutError = result.error || 'Order failed';
         }
