@@ -130,16 +130,20 @@ const CartComponent = {
           </div>
           <div v-if="orderForm.paymentMethod === 'online'">
             <div class="mb-3">
-              <label for="bankName" class="form-label">Bank Name</label>
-              <input type="text" id="bankName" v-model="orderForm.bankName" class="form-control" required>
+              <label for="cardNumber" class="form-label">Card Number (16 digits)</label>
+              <input type="text" id="cardNumber" v-model="orderForm.cardNumber" class="form-control" required>
             </div>
             <div class="mb-3">
-              <label for="accountNumber" class="form-label">Account Number</label>
-              <input type="text" id="accountNumber" v-model="orderForm.accountNumber" class="form-control" required>
+              <label for="cardName" class="form-label">Name on Card</label>
+              <input type="text" id="cardName" v-model="orderForm.cardName" class="form-control" required>
             </div>
             <div class="mb-3">
-              <label for="sortCode" class="form-label">Sort Code</label>
-              <input type="text" id="sortCode" v-model="orderForm.sortCode" class="form-control" required>
+              <label for="expiryDate" class="form-label">Expiry Date (MM/YY)</label>
+              <input type="text" id="expiryDate" v-model="orderForm.expiryDate" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label for="securityCode" class="form-label">Security Code (3 digits)</label>
+              <input type="text" id="securityCode" v-model="orderForm.securityCode" class="form-control" required>
             </div>
           </div>
           <button type="submit" :disabled="!isFormValid || selectedItems.length === 0" class="btn btn-success">Checkout Selected Items</button>
@@ -155,9 +159,10 @@ const CartComponent = {
         name: '',
         phone: '',
         paymentMethod: '',
-        bankName: '',
-        accountNumber: '',
-        sortCode: ''
+        cardNumber: '',
+        cardName: '',
+        expiryDate: '',
+        securityCode: ''
       },
       checkoutError: ''
     };
@@ -179,12 +184,14 @@ const CartComponent = {
         return false;
       }
       if (this.orderForm.paymentMethod === 'online') {
-        const bankNameRegex = /^[a-zA-Z\s]+$/;
-        const accountNumberRegex = /^\d{8}$/;
-        const sortCodeRegex = /^\d{2}-\d{2}-\d{2}$/;
-        return bankNameRegex.test(this.orderForm.bankName) &&
-               accountNumberRegex.test(this.orderForm.accountNumber) &&
-               sortCodeRegex.test(this.orderForm.sortCode);
+        const cardNumberRegex = /^\d{16}$/;
+        const cardNameRegex = /^[a-zA-Z\s]+$/;
+        const expiryDateRegex = /^\d{2}\/\d{2}$/;
+        const securityCodeRegex = /^\d{3}$/;
+        return cardNumberRegex.test(this.orderForm.cardNumber) &&
+               cardNameRegex.test(this.orderForm.cardName) &&
+               expiryDateRegex.test(this.orderForm.expiryDate) &&
+               securityCodeRegex.test(this.orderForm.securityCode);
       }
       return true;
     }
@@ -222,9 +229,10 @@ const CartComponent = {
         items: selectedCartItems.map(item => ({ lessonId: item._id, qty: item.qty }))
       };
       if (this.orderForm.paymentMethod === 'online') {
-        order.bankName = this.orderForm.bankName;
-        order.accountNumber = this.orderForm.accountNumber;
-        order.sortCode = this.orderForm.sortCode;
+        order.cardNumber = this.orderForm.cardNumber;
+        order.cardName = this.orderForm.cardName;
+        order.expiryDate = this.orderForm.expiryDate;
+        order.securityCode = this.orderForm.securityCode;
       }
       try {
         const response = await fetch(`${this.$root.apiBase}/orders`, {
@@ -243,7 +251,7 @@ const CartComponent = {
             this.$root.cart.splice(index, 1);
           });
           this.selectedItems = [];
-          this.orderForm = { name: '', phone: '', paymentMethod: '', bankName: '', accountNumber: '', sortCode: '' };
+          this.orderForm = { name: '', phone: '', paymentMethod: '', cardNumber: '', cardName: '', expiryDate: '', securityCode: '' };
           this.$router.push('/lessons');
           await this.$root.fetchLessons();
           await this.$root.fetchOrders();
