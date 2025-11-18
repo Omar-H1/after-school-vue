@@ -20,7 +20,7 @@ const LessonsComponent = {
       <div class="row">
         <div v-for="lesson in lessons" :key="lesson._id" class="col-md-6 col-lg-4 mb-4">
           <div class="card h-100" style="border: 2px solid purple; background-color: #f0f0f0;">
-            <img :src="'/images/' + lesson.image" class="card-img-top" :alt="lesson.subject" style="height: 200px; object-fit: contain;">
+            <img :src="'images/' + lesson.image" class="card-img-top" :alt="lesson.subject" style="height: 200px; object-fit: contain;">
             <div class="card-body">
               <h5 class="card-title" style="color: purple;">{{ lesson.subject }}</h5>
               <p class="card-text" style="color: black;">Location: {{ lesson.location }}</p>
@@ -199,6 +199,7 @@ const CartComponent = {
   },
   methods: {
     async removeFromCart(index) {
+      if (this.$root.isGitHubPages) return;
       const item = this.cart[index];
       try {
         const response = await fetch(`${this.$root.apiBase}/cart/remove`, {
@@ -220,6 +221,7 @@ const CartComponent = {
       }
     },
     async checkout() {
+      if (this.$root.isGitHubPages) return;
       this.checkoutError = '';
       if (!this.isFormValid || this.selectedItems.length === 0) return;
       const selectedCartItems = this.selectedItems.map(index => this.cart[index]);
@@ -294,6 +296,7 @@ const OrdersComponent = {
   },
   methods: {
     async fetchOrders() {
+      if (this.$root.isGitHubPages) return;
       try {
         const response = await fetch(`${this.$root.apiBase}/orders`);
         this.orders = await response.json();
@@ -350,17 +353,21 @@ const App = {
         price: 'asc',
         spaces: 'asc'
       },
-      apiBase: localStorage.getItem('apiBase') || 'https://express-app-7jpo.onrender.com'
+      apiBase: localStorage.getItem('apiBase') || 'https://express-app-7jpo.onrender.com',
+      isGitHubPages: window.location.hostname === 'omar-h1.github.io'
 
     };
   },
   async mounted() {
-    await this.fetchLessons();
-    await this.fetchCart();
-    await this.fetchOrders();
+    if (!this.isGitHubPages) {
+      await this.fetchLessons();
+      await this.fetchCart();
+      await this.fetchOrders();
+    }
   },
   methods: {
     async fetchOrders() {
+      if (this.isGitHubPages) return;
       try {
         const response = await fetch(`${this.apiBase}/orders`);
         this.orders = await response.json();
@@ -369,6 +376,7 @@ const App = {
       }
     },
     async fetchCart() {
+      if (this.isGitHubPages) return;
       try {
         const response = await fetch(`${this.apiBase}/cart`);
         this.cart = await response.json();
@@ -377,6 +385,7 @@ const App = {
       }
     },
     async fetchLessons() {
+      if (this.isGitHubPages) return;
       try {
         const response = await fetch(`${this.apiBase}/lessons`);
         this.lessons = await response.json();
@@ -385,6 +394,7 @@ const App = {
       }
     },
     async searchLessons() {
+      if (this.isGitHubPages) return;
       if (this.searchTerm.trim() === '') {
         await this.fetchLessons();
         return;
@@ -406,6 +416,7 @@ const App = {
       });
     },
     async addToCart(lesson) {
+      if (this.isGitHubPages) return;
       if (lesson.spaces > 0) {
         try {
           const response = await fetch(`${this.apiBase}/cart/add`, {
