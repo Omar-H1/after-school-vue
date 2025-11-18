@@ -354,12 +354,26 @@ const App = {
         spaces: 'asc'
       },
       apiBase: localStorage.getItem('apiBase') || 'https://express-app-7jpo.onrender.com',
-      isGitHubPages: window.location.hostname === 'omar-h1.github.io'
+      isGitHubPages: window.location.hostname === 'omar-h1.github.io',
+      staticLessons: [
+        { _id: 'static-art', subject: 'art', location: 'Barnet', price: 85, spaces: 10, image: 'Art.jpg' },
+        { _id: 'static-coding', subject: 'coding', location: 'Finchley', price: 120, spaces: 10, image: 'Coding.jpg' },
+        { _id: 'static-dance', subject: 'dance', location: 'Edgware', price: 65, spaces: 10, image: 'Dance.jpg' },
+        { _id: 'static-drama', subject: 'drama', location: 'Wembley', price: 75, spaces: 10, image: 'Drama.jpg' },
+        { _id: 'static-english', subject: 'english', location: 'Colindale', price: 80, spaces: 10, image: 'English.jpg' },
+        { _id: 'static-history', subject: 'history', location: 'Golders Green', price: 95, spaces: 10, image: 'History.jpg' },
+        { _id: 'static-math', subject: 'math', location: 'Hendon', price: 100, spaces: 10, image: 'Math.jpg' },
+        { _id: 'static-music', subject: 'music', location: 'Mill Hill', price: 70, spaces: 10, image: 'Music.jpg' },
+        { _id: 'static-science', subject: 'science', location: 'Brent Cross', price: 90, spaces: 10, image: 'Science.jpg' },
+        { _id: 'static-sports', subject: 'sports', location: 'Kingsbury', price: 60, spaces: 10, image: 'Sports.jpg' }
+      ]
 
     };
   },
   async mounted() {
-    if (!this.isGitHubPages) {
+    if (this.isGitHubPages) {
+      this.lessons = this.staticLessons.slice();
+    } else {
       await this.fetchLessons();
       await this.fetchCart();
       await this.fetchOrders();
