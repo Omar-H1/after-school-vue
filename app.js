@@ -350,7 +350,8 @@ const App = {
         price: 'asc',
         spaces: 'asc'
       },
-      apiBase: localStorage.getItem('apiBase') || 'http://localhost:8080'
+      apiBase: localStorage.getItem('apiBase') || 'https://express-app-7jpo.onrender.com'
+
     };
   },
   async mounted() {
