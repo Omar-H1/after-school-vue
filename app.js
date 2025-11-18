@@ -333,7 +333,9 @@ const App = {
           </div>
         </div>
       </nav>
-      <router-view></router-view>
+      <div class="container" style="max-width: 1200px;">
+        <router-view></router-view>
+      </div>
     </div>
   `,
   data() {
@@ -434,8 +436,9 @@ const App = {
       const messageDiv = document.createElement('div');
       messageDiv.textContent = message;
       messageDiv.style.position = 'fixed';
-      messageDiv.style.top = '20px';
-      messageDiv.style.right = '20px';
+      messageDiv.style.top = '80px';
+      messageDiv.style.left = '50%';
+      messageDiv.style.transform = 'translateX(-50%)';
       messageDiv.style.backgroundColor = 'green';
       messageDiv.style.color = 'white';
       messageDiv.style.padding = '10px';
