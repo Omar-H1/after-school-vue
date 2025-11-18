@@ -20,7 +20,7 @@ const LessonsComponent = {
       <div class="row">
         <div v-for="lesson in lessons" :key="lesson._id" class="col-md-6 col-lg-4 mb-4">
           <div class="card h-100" style="border: 2px solid purple; background-color: #f0f0f0;">
-            <img :src="'images/' + lesson.image" class="card-img-top" :alt="lesson.subject" style="height: 200px; object-fit: contain;">
+            <img :src="($root.isGitHubPages ? './images/' : 'images/') + lesson.image" class="card-img-top" :alt="lesson.subject" style="height: 200px; object-fit: contain;">
             <div class="card-body">
               <h5 class="card-title" style="color: purple;">{{ lesson.subject }}</h5>
               <p class="card-text" style="color: black;">Location: {{ lesson.location }}</p>
