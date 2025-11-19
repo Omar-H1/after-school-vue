@@ -354,7 +354,7 @@ const App = {
     <div style="background-color: #f8f9fa; min-height: 100vh;">
       <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: black;">
         <div class="container-fluid">
-          <router-link to="/lessons" class="navbar-brand" style="color: purple; font-size: 1.8em; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🚀 After School App</router-link>
+          <router-link to="/" class="navbar-brand" style="color: purple; font-size: 1.8em; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">🚀 After School App</router-link>
           <div class="navbar-nav">
             <router-link to="/lessons" class="nav-link" style="color: white;">Lessons</router-link>
             <router-link to="/cart" class="nav-link" style="color: white;"><i class="fas fa-shopping-cart"></i> <span v-if="cart.length > 0" class="badge" style="background-color: purple;">{{ cart.length }}</span></router-link>
@@ -379,7 +379,7 @@ const App = {
         price: 'asc',
         spaces: 'asc'
       },
-      apiBase: localStorage.getItem('apiBase') || 'http://localhost:8080'
+      apiBase: localStorage.getItem('apiBase') || 'https://express-app-7jpo.onrender.com'
     };
   },
   async mounted() {
