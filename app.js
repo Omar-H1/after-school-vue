@@ -424,6 +424,9 @@ const App = {
         console.log('Lessons fetched', this.lessons);
       } catch (error) {
         console.error('Failed to fetch lessons:', error);
+        // Fallback to sample lessons for GitHub Pages or when backend is not running
+        this.lessons = this.sampleLessons.slice();
+        console.log('Using sample lessons', this.lessons);
       }
     },
     async searchLessons() {
