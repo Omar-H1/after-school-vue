@@ -379,7 +379,19 @@ const App = {
         price: 'asc',
         spaces: 'asc'
       },
-      apiBase: localStorage.getItem('apiBase') || 'https://express-app-7jpo.onrender.com'
+      apiBase: 'http://localhost:8080',
+      sampleLessons: [
+        { _id: '69122bfeabae0cc1bdee6992', subject: 'art', location: 'A 12', price: 5, spaces: 10, image: 'Art.jpg' },
+        { _id: '69122bfeabae0cc1bdee6993', subject: 'coding', location: 'B 07', price: 10, spaces: 10, image: 'Coding.jpg' },
+        { _id: '69122bfeabae0cc1bdee6994', subject: 'dance', location: 'C 15', price: 15, spaces: 10, image: 'Dance.jpg' },
+        { _id: '69122bfeabae0cc1bdee6995', subject: 'drama', location: 'D 22', price: 20, spaces: 10, image: 'Drama.jpg' },
+        { _id: '69122bfeabae0cc1bdee698e', subject: 'english', location: 'E 03', price: 25, spaces: 10, image: 'English.jpg' },
+        { _id: '69122bfeabae0cc1bdee6990', subject: 'history', location: 'F 18', price: 5, spaces: 10, image: 'History.jpg' },
+        { _id: '69122bfeabae0cc1bdee698d', subject: 'math', location: 'G 09', price: 10, spaces: 10, image: 'Math.jpg' },
+        { _id: '69122bfeabae0cc1bdee6991', subject: 'music', location: 'H 14', price: 15, spaces: 10, image: 'Music.jpg' },
+        { _id: '69122bfeabae0cc1bdee698f', subject: 'science', location: 'I 21', price: 20, spaces: 10, image: 'Science.jpg' },
+        { _id: '69122bfeabae0cc1bdee6996', subject: 'sports', location: 'J 06', price: 25, spaces: 10, image: 'Sports.jpg' }
+      ]
     };
   },
   async mounted() {
@@ -405,9 +417,11 @@ const App = {
       }
     },
     async fetchLessons() {
+      console.log('Fetching lessons from', this.apiBase);
       try {
         const response = await fetch(`${this.apiBase}/lessons`);
         this.lessons = await response.json();
+        console.log('Lessons fetched', this.lessons);
       } catch (error) {
         console.error('Failed to fetch lessons:', error);
       }
