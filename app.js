@@ -1,6 +1,35 @@
 const { createApp } = Vue;
 const { createRouter, createWebHashHistory } = VueRouter;
 
+const HomeComponent = {
+  template: `
+    <div class="home-container">
+      <div class="hero-section">
+        <h1 class="animated-title">Welcome to After School Activities</h1>
+        <router-link to="/lessons" class="btn btn-primary btn-lg animated-button">Browse Lessons</router-link>
+        <p class="hero-subtitle">Book After School Sessions Now</p>
+      </div>
+      <div class="features-section">
+        <div class="feature-card">
+          <i class="fas fa-book-open fa-3x"></i>
+          <h3>Wide Range of Subjects</h3>
+          <p>From Art to Sports, find the perfect after-school activity for your child.</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-clock fa-3x"></i>
+          <h3>Flexible Scheduling</h3>
+          <p>Choose from various time slots that fit your family's schedule.</p>
+        </div>
+        <div class="feature-card">
+          <i class="fas fa-users fa-3x"></i>
+          <h3>Expert Instructors</h3>
+          <p>Learn from qualified professionals in a safe and engaging environment.</p>
+        </div>
+      </div>
+    </div>
+  `
+};
+
 const LessonsComponent = {
   template: `
     <div>
@@ -20,7 +49,7 @@ const LessonsComponent = {
       <div class="row">
         <div v-for="lesson in lessons" :key="lesson._id" class="col-md-6 col-lg-4 mb-4">
           <div class="card h-100" style="border: 2px solid purple; background-color: #f0f0f0;">
-            <img :src="($root.isGitHubPages ? './images/' : 'images/') + lesson.image" class="card-img-top" :alt="lesson.subject" style="height: 200px; object-fit: contain;">
+            <img :src="'images/' + lesson.image" class="card-img-top" :alt="lesson.subject" style="height: 200px; object-fit: contain;">
             <div class="card-body">
               <h5 class="card-title" style="color: purple;">{{ lesson.subject }}</h5>
               <p class="card-text" style="color: black;">Location: {{ lesson.location }}</p>
@@ -199,7 +228,6 @@ const CartComponent = {
   },
   methods: {
     async removeFromCart(index) {
-      if (this.$root.isGitHubPages) return;
       const item = this.cart[index];
       try {
         const response = await fetch(`${this.$root.apiBase}/cart/remove`, {
@@ -221,7 +249,6 @@ const CartComponent = {
       }
     },
     async checkout() {
-      if (this.$root.isGitHubPages) return;
       this.checkoutError = '';
       if (!this.isFormValid || this.selectedItems.length === 0) return;
       const selectedCartItems = this.selectedItems.map(index => this.cart[index]);
@@ -296,7 +323,6 @@ const OrdersComponent = {
   },
   methods: {
     async fetchOrders() {
-      if (this.$root.isGitHubPages) return;
       try {
         const response = await fetch(`${this.$root.apiBase}/orders`);
         this.orders = await response.json();
@@ -312,7 +338,7 @@ const OrdersComponent = {
 };
 
 const routes = [
-  { path: '/', redirect: '/lessons' },
+  { path: '/', component: HomeComponent },
   { path: '/lessons', component: LessonsComponent },
   { path: '/cart', component: CartComponent },
   { path: '/orders', component: OrdersComponent }
@@ -353,35 +379,16 @@ const App = {
         price: 'asc',
         spaces: 'asc'
       },
-      apiBase: localStorage.getItem('apiBase') || 'https://express-app-7jpo.onrender.com',
-      isGitHubPages: window.location.hostname === 'omar-h1.github.io',
-      staticLessons: [
-        { _id: 'static-art', subject: 'art', location: 'Barnet', price: 85, spaces: 10, image: 'Art.jpg' },
-        { _id: 'static-coding', subject: 'coding', location: 'Finchley', price: 120, spaces: 10, image: 'Coding.jpg' },
-        { _id: 'static-dance', subject: 'dance', location: 'Edgware', price: 65, spaces: 10, image: 'Dance.jpg' },
-        { _id: 'static-drama', subject: 'drama', location: 'Wembley', price: 75, spaces: 10, image: 'Drama.jpg' },
-        { _id: 'static-english', subject: 'english', location: 'Colindale', price: 80, spaces: 10, image: 'English.jpg' },
-        { _id: 'static-history', subject: 'history', location: 'Golders Green', price: 95, spaces: 10, image: 'History.jpg' },
-        { _id: 'static-math', subject: 'math', location: 'Hendon', price: 100, spaces: 10, image: 'Math.jpg' },
-        { _id: 'static-music', subject: 'music', location: 'Mill Hill', price: 70, spaces: 10, image: 'Music.jpg' },
-        { _id: 'static-science', subject: 'science', location: 'Brent Cross', price: 90, spaces: 10, image: 'Science.jpg' },
-        { _id: 'static-sports', subject: 'sports', location: 'Kingsbury', price: 60, spaces: 10, image: 'Sports.jpg' }
-      ]
-
+      apiBase: localStorage.getItem('apiBase') || 'http://localhost:8080'
     };
   },
   async mounted() {
-    if (this.isGitHubPages) {
-      this.lessons = this.staticLessons.slice();
-    } else {
-      await this.fetchLessons();
-      await this.fetchCart();
-      await this.fetchOrders();
-    }
+    await this.fetchLessons();
+    await this.fetchCart();
+    await this.fetchOrders();
   },
   methods: {
     async fetchOrders() {
-      if (this.isGitHubPages) return;
       try {
         const response = await fetch(`${this.apiBase}/orders`);
         this.orders = await response.json();
@@ -390,7 +397,6 @@ const App = {
       }
     },
     async fetchCart() {
-      if (this.isGitHubPages) return;
       try {
         const response = await fetch(`${this.apiBase}/cart`);
         this.cart = await response.json();
@@ -399,7 +405,6 @@ const App = {
       }
     },
     async fetchLessons() {
-      if (this.isGitHubPages) return;
       try {
         const response = await fetch(`${this.apiBase}/lessons`);
         this.lessons = await response.json();
@@ -408,7 +413,6 @@ const App = {
       }
     },
     async searchLessons() {
-      if (this.isGitHubPages) return;
       if (this.searchTerm.trim() === '') {
         await this.fetchLessons();
         return;
@@ -430,7 +434,6 @@ const App = {
       });
     },
     async addToCart(lesson) {
-      if (this.isGitHubPages) return;
       if (lesson.spaces > 0) {
         try {
           const response = await fetch(`${this.apiBase}/cart/add`, {
