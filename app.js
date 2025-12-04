@@ -144,7 +144,7 @@ const CartComponent = {
             <input type="text" id="name" v-model="orderForm.name" class="form-control" required>
           </div>
           <div class="mb-3">
-            <label for="phone" class="form-label">Phone (at least 10 digits)</label>
+            <label for="phone" class="form-label">Phone Number</label>
             <input type="text" id="phone" v-model="orderForm.phone" class="form-control" required>
           </div>
           <div class="mb-3">
@@ -295,9 +295,12 @@ const OrdersComponent = {
   template: `
     <div>
       <h2>My Orders</h2>
-      <div v-if="orders.length === 0" class="alert alert-info">No orders found.</div>
+      <div v-if="filteredOrders.length === 0" class="text-center">
+        <p>You have no orders yet.</p>
+        <router-link to="/lessons" class="btn btn-primary">Order Your Lesson from Here</router-link>
+      </div>
       <div v-else>
-        <div v-for="order in orders" :key="order._id" class="card mb-3">
+        <div v-for="order in filteredOrders" :key="order._id" class="card mb-3">
           <div class="card-body">
             <h5>Order ID: {{ order._id }}</h5>
             <p>Name: {{ order.name }}</p>
@@ -318,8 +321,19 @@ const OrdersComponent = {
       orders: []
     };
   },
+  computed: {
+    filteredOrders() {
+      return this.orders.filter(order => order.items && order.items.every(item => this.getLessonName(item.lessonId) !== 'Unknown Lesson'));
+    }
+  },
   async mounted() {
+    this.orders = this.$root.orders.slice();
     await this.fetchOrders();
+  },
+  watch: {
+    '$root.orders': function(newOrders) {
+      this.orders = newOrders.slice();
+    }
   },
   methods: {
     async fetchOrders() {
@@ -379,7 +393,7 @@ const App = {
         price: 'asc',
         spaces: 'asc'
       },
-      apiBase: 'http://localhost:8080',
+      apiBase: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:8080' : 'https://express-app-7jpo.onrender.com',
       sampleLessons: [
         { _id: '69122bfeabae0cc1bdee6992', subject: 'art', location: 'A 12', price: 5, spaces: 10, image: 'Art.jpg' },
         { _id: '69122bfeabae0cc1bdee6993', subject: 'coding', location: 'B 07', price: 10, spaces: 10, image: 'Coding.jpg' },
@@ -417,16 +431,22 @@ const App = {
       }
     },
     async fetchLessons() {
-      console.log('Fetching lessons from', this.apiBase);
-      try {
-        const response = await fetch(`${this.apiBase}/lessons`);
-        this.lessons = await response.json();
-        console.log('Lessons fetched', this.lessons);
-      } catch (error) {
-        console.error('Failed to fetch lessons:', error);
-        // Fallback to sample lessons for GitHub Pages or when backend is not running
+      if (window.location.hostname === 'omar-h1.github.io') {
+        // On GitHub Pages, use sample lessons directly without backend
         this.lessons = this.sampleLessons.slice();
-        console.log('Using sample lessons', this.lessons);
+        console.log('Using sample lessons for GitHub Pages', this.lessons);
+      } else {
+        console.log('Fetching lessons from', this.apiBase);
+        try {
+          const response = await fetch(`${this.apiBase}/lessons`);
+          this.lessons = await response.json();
+          console.log('Lessons fetched', this.lessons);
+        } catch (error) {
+          console.error('Failed to fetch lessons:', error);
+          // Fallback to sample lessons when backend is not running
+          this.lessons = this.sampleLessons.slice();
+          console.log('Using sample lessons', this.lessons);
+        }
       }
     },
     async searchLessons() {
