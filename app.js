@@ -431,22 +431,16 @@ const App = {
       }
     },
     async fetchLessons() {
-      if (window.location.hostname === 'omar-h1.github.io') {
-        // On GitHub Pages, use sample lessons directly without backend
+      console.log('Fetching lessons from', this.apiBase);
+      try {
+        const response = await fetch(`${this.apiBase}/lessons`);
+        this.lessons = await response.json();
+        console.log('Lessons fetched', this.lessons);
+      } catch (error) {
+        console.error('Failed to fetch lessons:', error);
+        // Fallback to sample lessons when backend is not running
         this.lessons = this.sampleLessons.slice();
-        console.log('Using sample lessons for GitHub Pages', this.lessons);
-      } else {
-        console.log('Fetching lessons from', this.apiBase);
-        try {
-          const response = await fetch(`${this.apiBase}/lessons`);
-          this.lessons = await response.json();
-          console.log('Lessons fetched', this.lessons);
-        } catch (error) {
-          console.error('Failed to fetch lessons:', error);
-          // Fallback to sample lessons when backend is not running
-          this.lessons = this.sampleLessons.slice();
-          console.log('Using sample lessons', this.lessons);
-        }
+        console.log('Using sample lessons', this.lessons);
       }
     },
     async searchLessons() {
